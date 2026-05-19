@@ -1,14 +1,22 @@
 # TokenBar
 
-TokenBar is a small macOS menu bar app for keeping AI coding-agent usage visible while you work.
+**A macOS menu bar usage monitor for OpenAI Codex and AI coding agents.**
 
-It is built for people who use Codex heavily and want a quick local view of token usage, reset pressure, forecasted spend, and work rhythm without opening a dashboard every few minutes.
+TokenBar keeps coding-agent usage visible while you work: tokens, quota pressure, reset timing, forecasted spend, and daily work rhythm from a compact macOS icon-bar surface.
+
+It is built for heavy OpenAI Codex users first, with future connector surfaces for Claude by Anthropic, Cursor, Google coding agents, and other agentic development tools once explicit usage APIs or local exports are available.
+
+[LinkedIn launch post](https://www.linkedin.com/posts/arnav-salkade-27076a201_a-500000-engineer-must-use-at-least-250000-activity-7462243251710763009-aluS)
 
 ![TokenBar AI overview](assets/screenshots/tokenbar-overview.png)
 
+## Why It Exists
+
+Coding agents are becoming part of daily software work, but usage limits and cost burn are still too easy to lose track of. TokenBar makes that invisible layer visible from the menu bar, so builders can see when Codex is healthy, when weekly pressure is tight, and how current usage might project forward.
+
 ## What It Shows
 
-- Codex token usage from local session logs
+- OpenAI Codex token usage from local session logs
 - 5-hour and weekly quota pressure
 - Daily token history with peak-day highlighting
 - Estimated dollar usage from local token counts
@@ -23,9 +31,13 @@ The overview is designed as a compact data-storytelling surface. Use the arrow c
 
 ## Provider Status
 
-TokenBar currently reads Codex usage locally. Claude, Gemini, Cursor, and Antigravity are shown as future connector surfaces until explicit usage APIs or local exports are wired in.
+TokenBar currently reads OpenAI Codex usage locally. Claude by Anthropic, Cursor, Google coding agents, and other coding-agent surfaces are shown as future connector targets until explicit usage APIs or local exports are wired in.
 
 Browser sign-in is not treated as usage authorization. TokenBar does not read browser cookies, passwords, account secrets, or provider tokens.
+
+## Keywords
+
+OpenAI Codex, Codex, AI coding agents, coding agent usage, token usage, token monitor, quota monitor, cost forecast, macOS menu bar app, SwiftUI, local-first, Claude Anthropic, Cursor, Google coding agents, developer productivity, agentic coding, AI developer tools.
 
 ## Download
 

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 download_url="https://github.com/Arnie016/codex-goated-skills/releases/download/v0.1.0/CodexLimitBar-macOS-arm64-2026-05-20.zip"
+launcher_url="https://raw.githubusercontent.com/Arnie016/TokenBar/main/bin/tokenbar"
 install_dir="$HOME/Applications"
 bin_dir="$HOME/.local/bin"
 app_path="$install_dir/TokenBar.app"
@@ -28,27 +29,7 @@ mkdir -p "$install_dir" "$bin_dir"
 rm -rf "$app_path"
 ditto "$source_app" "$app_path"
 
-cat > "$bin_dir/tokenbar" <<'LAUNCHER'
-#!/usr/bin/env bash
-set -euo pipefail
-
-app_path="${TOKENBAR_APP:-$HOME/Applications/TokenBar.app}"
-if [[ ! -d "$app_path" ]]; then
-  app_path="$HOME/Applications/CodexLimitBar.app"
-fi
-if [[ ! -d "$app_path" ]]; then
-  app_path="/Applications/TokenBar.app"
-fi
-if [[ ! -d "$app_path" ]]; then
-  echo "TokenBar is not installed. Run:" >&2
-  echo "  curl -fsSL https://raw.githubusercontent.com/Arnie016/TokenBar/main/install.sh | bash" >&2
-  exit 1
-fi
-
-open "$app_path"
-echo "Opened TokenBar: $app_path"
-LAUNCHER
-
+curl -fsSL "$launcher_url" -o "$bin_dir/tokenbar"
 chmod +x "$bin_dir/tokenbar"
 
 echo "Installed TokenBar to:"

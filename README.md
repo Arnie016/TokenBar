@@ -24,7 +24,15 @@ Then open it from any terminal:
 tokenbar
 ```
 
-The launcher installs TokenBar into `~/Applications` and adds `tokenbar` under `~/.local/bin`.
+The launcher installs TokenBar into `~/Applications` and adds `tokenbar` under `~/.local/bin`. Launching it opens the macOS app, plays a short terminal movie, then drops into a small `TokenBar ›` prompt where you can ask about usage, cost, energy, providers, diagnostics, or installation.
+
+```text
+TokenBar › usage
+TokenBar › cost
+TokenBar › energy
+TokenBar › providers
+TokenBar › quit
+```
 
 ## Why It Exists
 

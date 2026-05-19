@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_CANDIDATES=(
+  "${TOKENBAR_APP:-}"
+  "$HOME/Applications/TokenBar.app"
+  "$HOME/Applications/CodexLimitBar.app"
+  "/Applications/TokenBar.app"
+  "/Applications/CodexLimitBar.app"
+)
+
+download_url="https://github.com/Arnie016/codex-goated-skills/releases/download/v0.1.0/CodexLimitBar-macOS-arm64-2026-05-20.zip"
+install_url="https://raw.githubusercontent.com/Arnie016/TokenBar/main/install.sh"
+
+usage() {
+  cat <<'USAGE'
+TokenBar terminal launcher
+
+Usage:
+  tokenbar              Open TokenBar
+  tokenbar --install    Install TokenBar into ~/Applications and ~/.local/bin
+  tokenbar --path       Print the app path if found
+  tokenbar --help       Show this help
+
+USAGE
+}
+
+find_app() {
+  local candidate
+  for candidate in "${APP_CANDIDATES[@]}"; do
+    if [[ -n "$candidate" && -d "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+install_tokenbar() {
+  /bin/bash -c "$(curl -fsSL "$install_url")"
+}
+
+case "${1:-}" in
+  -h|--help|help)
+    usage
+    exit 0
+    ;;
+  --install|install)
+    install_tokenbar
+    exit 0
+    ;;
+  --path|path)
+    find_app
+    exit $?
+    ;;
+  "")
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if app_path="$(find_app)"; then
+  open "$app_path"
+  echo "Opened TokenBar: $app_path"
+  exit 0
+fi
+
+cat >&2 <<EOF
+TokenBar is not installed yet.
+
+Install it with:
+  curl -fsSL $install_url | bash
+
+Or download it manually:
+  $download_url
+EOF
+exit 1

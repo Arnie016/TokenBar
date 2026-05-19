@@ -34,6 +34,14 @@ TokenBar › providers
 TokenBar › quit
 ```
 
+Optional sound cues:
+
+```bash
+tokenbar --sound
+```
+
+The audio uses built-in macOS sounds only and is off by default.
+
 ## Why It Exists
 
 Coding agents are becoming part of daily software work, but usage limits and cost burn are still too easy to lose track of. TokenBar makes that invisible layer visible from the menu bar, so builders can see when Codex is healthy, when weekly pressure is tight, and how current usage might project forward.

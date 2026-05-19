@@ -24,6 +24,7 @@ Usage:
   tokenbar --no-animation
                         Open TokenBar with one plain status line
   tokenbar --movie      Force the terminal mini-movie
+  tokenbar --sound      Add quiet macOS sound cues to the launch movie
   tokenbar --no-agent   Open TokenBar and return to the shell
   tokenbar --help       Show this help
 
@@ -104,6 +105,11 @@ EOF
     *energy*|*watt*|*joule*|*electron*|*power*)
       cat <<'EOF'
 The useful frontier metric is tokens / watt / dollar: how much useful reasoning you get for power and money. TokenBar does not yet sample real Mac power draw. A future energy connector should combine local token logs with battery/powermetrics samples to estimate joules per session and tokens per watt-hour.
+EOF
+      ;;
+    *audio*|*sound*|*music*)
+      cat <<'EOF'
+Audio is opt-in. Run `tokenbar --sound` or `TOKENBAR_SOUND=1 tokenbar` to add short built-in macOS sound cues to the terminal movie. The public repo does not ship copyrighted audio files.
 EOF
       ;;
     *agent*|*provider*|*chatgpt*|*openai*|*codex*|*claude*|*anthropic*|*gemini*|*cursor*|*antigravity*)
@@ -199,6 +205,23 @@ animated_open_message() {
     "opening native menu-bar surface"
   )
 
+  play_movie_sound() {
+    local index="$1"
+    [[ "${sound_enabled:-false}" == true ]] || return 0
+    command -v afplay >/dev/null 2>&1 || return 0
+
+    local sound
+    case "$index" in
+      0|1) sound="/System/Library/Sounds/Tink.aiff" ;;
+      2|3) sound="/System/Library/Sounds/Pop.aiff" ;;
+      4|5) sound="/System/Library/Sounds/Funk.aiff" ;;
+      6|7) sound="/System/Library/Sounds/Glass.aiff" ;;
+      *) sound="/System/Library/Sounds/Purr.aiff" ;;
+    esac
+
+    [[ -f "$sound" ]] && afplay "$sound" >/dev/null 2>&1 &
+  }
+
   draw_movie_frame() {
     local index="$1"
     local caption="${captions[$index]}"
@@ -252,6 +275,7 @@ EOF
       printf '\033[%sA' "$total_lines"
     fi
     printf '%s' "$clear_screen"
+    play_movie_sound "$frame"
     draw_movie_frame "$frame"
     sleep 0.18
   done
@@ -264,6 +288,11 @@ quiet=false
 animate=true
 force_animation=false
 agent=true
+sound_enabled=false
+
+if [[ "${TOKENBAR_SOUND:-0}" == "1" || "${TOKENBAR_SOUND:-}" == "true" ]]; then
+  sound_enabled=true
+fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -289,6 +318,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --movie)
       force_animation=true
+      ;;
+    --sound)
+      sound_enabled=true
       ;;
     --no-agent)
       agent=false

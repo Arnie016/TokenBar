@@ -20,6 +20,9 @@ Usage:
   tokenbar              Open TokenBar
   tokenbar --install    Install TokenBar into ~/Applications and ~/.local/bin
   tokenbar --path       Print the app path if found
+  tokenbar --quiet      Open TokenBar without terminal output
+  tokenbar --no-animation
+                        Open TokenBar with one plain status line
   tokenbar --help       Show this help
 
 USAGE
@@ -40,6 +43,37 @@ install_tokenbar() {
   /bin/bash -c "$(curl -fsSL "$install_url")"
 }
 
+supports_animation() {
+  [[ -t 1 && "${TERM:-dumb}" != "dumb" && -z "${NO_COLOR:-}" ]]
+}
+
+plain_open_message() {
+  printf 'Opened TokenBar: %s\n' "$1"
+}
+
+animated_open_message() {
+  local app_path="$1"
+  local frames=(
+    "TokenBar  [░░░░░░░░░░] finding app"
+    "TokenBar  [██░░░░░░░░] reading local logs"
+    "TokenBar  [████░░░░░░] checking quota"
+    "TokenBar  [██████░░░░] preparing graph"
+    "TokenBar  [████████░░] opening menu bar"
+    "TokenBar  [██████████] ready"
+  )
+  local frame
+
+  for frame in "${frames[@]}"; do
+    printf '\r\033[36m%s\033[0m' "$frame"
+    sleep 0.08
+  done
+  printf '\n\033[32m✓ TokenBar is live in the menu bar\033[0m\n'
+  printf '\033[2m%s\033[0m\n' "$app_path"
+}
+
+quiet=false
+animate=true
+
 case "${1:-}" in
   -h|--help|help)
     usage
@@ -53,6 +87,13 @@ case "${1:-}" in
     find_app
     exit $?
     ;;
+  --quiet|-q)
+    quiet=true
+    animate=false
+    ;;
+  --no-animation|--plain)
+    animate=false
+    ;;
   "")
     ;;
   *)
@@ -64,7 +105,13 @@ esac
 
 if app_path="$(find_app)"; then
   open "$app_path"
-  echo "Opened TokenBar: $app_path"
+  if [[ "$quiet" == true ]]; then
+    exit 0
+  elif [[ "$animate" == true ]] && supports_animation; then
+    animated_open_message "$app_path"
+  else
+    plain_open_message "$app_path"
+  fi
   exit 0
 fi
 

@@ -23,6 +23,7 @@ Usage:
   tokenbar --quiet      Open TokenBar without terminal output
   tokenbar --no-animation
                         Open TokenBar with one plain status line
+  tokenbar --movie      Force the terminal mini-movie
   tokenbar --help       Show this help
 
 USAGE
@@ -58,34 +59,121 @@ animated_open_message() {
   local amber=$'\033[33m'
   local green=$'\033[32m'
   local violet=$'\033[35m'
+  local red=$'\033[31m'
   local dim=$'\033[2m'
   local reset=$'\033[0m'
-  local clear=$'\033[2K'
-  local frames=(
-    "e-  e-  e-       ${amber}J${reset}/$  →  ${dim}waiting for context${reset}"
-    " e-  ✧  e-      ${amber}J${reset}/$  →  ${cyan}token seed${reset}"
-    "  ✧  [tok] ✧    ${amber}W${reset}/$  →  ${cyan}context sparks${reset}"
-    " [tok] ⇄ [tok]  ${amber}tokens${reset}/${blue}watt${reset}/${green}dollar${reset}"
-    "   ◜●◝  VS  100%  ${violet}quota gate${reset}"
-    "  /▣\\  →  ${cyan}TokenBar opening menu-bar radar${reset}"
-    " ✦ [TOKENS] ✦  ${green}visible${reset}  ${dim}limits forecast cost${reset}"
-  )
+  local clear_down=$'\033[J'
   local frame
+  local total_lines=10
+
+  draw_movie_frame() {
+    local step="$1"
+    case "$step" in
+      1)
+        cat <<EOF
+${violet}╭─ TokenBar mini movie ─────────────────────────────────────────────────────╮${reset}
+${violet}│${reset}  ${dim}scene 1/6${reset}  electrons enter the meter                                      ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}      e-       e-        e-                ${dim}raw work current${reset}              ${violet}│${reset}
+${violet}│${reset}        \\       |        /                                                   ${violet}│${reset}
+${violet}│${reset}         \\      |       /        ${amber}Joules / dollar${reset}                      ${violet}│${reset}
+${violet}│${reset}          \\     |      /                                                   ${violet}│${reset}
+${violet}│${reset}           [  watt gate  ]        ${dim}power becomes compute${reset}                  ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}╰────────────────────────────────────────────────────────────────────────────╯${reset}
+EOF
+        ;;
+      2)
+        cat <<EOF
+${violet}╭─ TokenBar mini movie ─────────────────────────────────────────────────────╮${reset}
+${violet}│${reset}  ${dim}scene 2/6${reset}  the cloud sprite wakes up                                    ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}                         ${cyan}.--.__.--.${reset}                                      ${violet}│${reset}
+${violet}│${reset}      e-  e-  e-  --->   ${cyan}(  o  o  )${reset}      ${dim}agent appetite rising${reset}       ${violet}│${reset}
+${violet}│${reset}                         ${cyan}(   ▵   )${reset}                                      ${violet}│${reset}
+${violet}│${reset}                          ${cyan}'-.__.-'${reset}       ${amber}tokens / watt / dollar${reset}     ${violet}│${reset}
+${violet}│${reset}                            ${cyan}/▌▌\\${reset}                                        ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}╰────────────────────────────────────────────────────────────────────────────╯${reset}
+EOF
+        ;;
+      3)
+        cat <<EOF
+${violet}╭─ TokenBar mini movie ─────────────────────────────────────────────────────╮${reset}
+${violet}│${reset}  ${dim}scene 3/6${reset}  electrons crystallize into tokens                           ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}      ${dim}e- e-${reset}  ->  ${amber}J${reset}  ->  ${blue}W${reset}  ->  ${green}[tok]${reset}  ${green}[tok]${reset}  ${green}[tok]${reset}                  ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}                         ${cyan}.--.__.--.${reset}                                      ${violet}│${reset}
+${violet}│${reset}                        ${cyan}(  ^  ^  )${reset}  ${green}✦${reset} ${green}✦${reset} ${green}✦${reset}                         ${violet}│${reset}
+${violet}│${reset}                         ${cyan}'-.__.-'${reset}    ${dim}context turns visible${reset}             ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}╰────────────────────────────────────────────────────────────────────────────╯${reset}
+EOF
+        ;;
+      4)
+        cat <<EOF
+${violet}╭─ TokenBar mini movie ─────────────────────────────────────────────────────╮${reset}
+${violet}│${reset}  ${dim}scene 4/6${reset}  quota gate battle                                            ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}           ${cyan}.--.__.--.${reset}              ${red}██████████${reset} 100% gate              ${violet}│${reset}
+${violet}│${reset}          ${cyan}(  >  <  )${reset}  ${green}[tok]${reset} ${green}[tok]${reset}  ${red}▌${reset}                           ${violet}│${reset}
+${violet}│${reset}           ${cyan}'-.__.-'${reset}      ${green}[tok]${reset}  ${red}▌${reset}       ${dim}limits should be seen early${reset}     ${violet}│${reset}
+${violet}│${reset}             ${cyan}/▌▌\\${reset}           ${green}[tok]${reset} ${red}▌${reset}                                   ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}       ${amber}metric:${reset} tokens per watt per dollar                              ${violet}│${reset}
+${violet}╰────────────────────────────────────────────────────────────────────────────╯${reset}
+EOF
+        ;;
+      5)
+        cat <<EOF
+${violet}╭─ TokenBar mini movie ─────────────────────────────────────────────────────╮${reset}
+${violet}│${reset}  ${dim}scene 5/6${reset}  radar locks onto usage                                      ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}                       ${blue}╭──────────────╮${reset}                             ${violet}│${reset}
+${violet}│${reset}      ${cyan}.--.__.--.${reset}   ${blue}│${reset}  ${green}226M today${reset}  ${blue}│${reset}     ${dim}history line + forecast${reset}     ${violet}│${reset}
+${violet}│${reset}     ${cyan}(  o  o  )${reset}  ${blue}│${reset}  ${amber}97% weekly${reset}  ${blue}│${reset}                             ${violet}│${reset}
+${violet}│${reset}      ${cyan}'-.__.-'${reset}   ${blue}│${reset}  ${violet}cost burn${reset}   ${blue}│${reset}                             ${violet}│${reset}
+${violet}│${reset}          ${cyan}/▌\\${reset}     ${blue}╰──────────────╯${reset}                             ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}╰────────────────────────────────────────────────────────────────────────────╯${reset}
+EOF
+        ;;
+      *)
+        cat <<EOF
+${violet}╭─ TokenBar mini movie ─────────────────────────────────────────────────────╮${reset}
+${violet}│${reset}  ${dim}scene 6/6${reset}  menu-bar launch                                             ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}             ${green}✦ [ TokenBar ] ✦${reset}                                        ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}        ${green}✓ live${reset}    ${cyan}tokens${reset}    ${amber}watts${reset}    ${blue}dollars${reset}    ${violet}limits${reset}                 ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}│${reset}        ${dim}app found locally; opening native menu-bar surface${reset}              ${violet}│${reset}
+${violet}│${reset}                                                                            ${violet}│${reset}
+${violet}╰────────────────────────────────────────────────────────────────────────────╯${reset}
+EOF
+        ;;
+    esac
+  }
 
   trap "printf '\033[?25h'; trap - INT TERM EXIT" INT TERM EXIT
   printf '\033[?25l'
-  for frame in "${frames[@]}"; do
-    printf '\r%s%s' "$clear" "$frame"
-    sleep 0.11
+  for frame in 1 2 3 4 5 6; do
+    if [[ "$frame" != "1" ]]; then
+      printf '\033[%sA' "$total_lines"
+    fi
+    printf '%s' "$clear_down"
+    draw_movie_frame "$frame"
+    sleep 0.42
   done
-  printf '\r%s%s✓ TokenBar is live%s  %stokens / watt / dollar%s\n' "$clear" "$green" "$reset" "$amber" "$reset"
-  printf '%s%s%s\n' "$dim" "$app_path" "$reset"
+  printf '%s✓ TokenBar is live%s  %stokens / watt / dollar%s\n' "$green" "$reset" "$amber" "$reset"
   printf '\033[?25h'
   trap - INT TERM EXIT
 }
 
 quiet=false
 animate=true
+force_animation=false
 
 case "${1:-}" in
   -h|--help|help)
@@ -107,6 +195,9 @@ case "${1:-}" in
   --no-animation|--plain)
     animate=false
     ;;
+  --movie)
+    force_animation=true
+    ;;
   "")
     ;;
   *)
@@ -120,6 +211,8 @@ if app_path="$(find_app)"; then
   open "$app_path"
   if [[ "$quiet" == true ]]; then
     exit 0
+  elif [[ "$animate" == true && "$force_animation" == true ]]; then
+    animated_open_message "$app_path"
   elif [[ "$animate" == true ]] && supports_animation; then
     animated_open_message "$app_path"
   else

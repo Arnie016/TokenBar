@@ -24,6 +24,7 @@ Usage:
   tokenbar --no-animation
                         Open TokenBar with one plain status line
   tokenbar --movie      Force the terminal mini-movie
+  tokenbar --no-agent   Open TokenBar and return to the shell
   tokenbar --help       Show this help
 
 USAGE
@@ -50,6 +51,115 @@ supports_animation() {
 
 plain_open_message() {
   printf 'Opened TokenBar: %s\n' "$1"
+}
+
+supports_agent_interface() {
+  [[ -t 0 && -t 1 ]]
+}
+
+answer_agent_prompt() {
+  local app_path="$1"
+  local input="$2"
+  local lower
+  lower="$(printf '%s' "$input" | tr '[:upper:]' '[:lower:]')"
+
+  case "$lower" in
+    *help*|*commands*|*\?*)
+      cat <<'EOF'
+Try:
+  usage        explain what TokenBar can read locally
+  cost         explain dollar estimates
+  energy       explain tokens / watt / dollar
+  agents       provider connector status
+  bugs         useful diagnostics
+  open         reopen the menu bar app
+  quit         leave this prompt
+EOF
+      ;;
+    *open*|*launch*)
+      open "$app_path"
+      printf 'Opened TokenBar again: %s\n' "$app_path"
+      ;;
+    *usage*|*token*|*quota*|*limit*)
+      cat <<'EOF'
+TokenBar currently reads OpenAI Codex usage from local session logs and combines that with the visible 5-hour and weekly quota windows. The macOS app is the source of truth for the live graph: token history, dotted forecast, peak day, weekly pressure, and projected local cost.
+EOF
+      ;;
+    *cost*|*dollar*|*spend*|*billing*)
+      cat <<'EOF'
+Dollar numbers are local estimates: tokens multiplied by the configured cost-per-million value. They are useful for trend and burn-rate awareness, but official billing, credits, org attribution, and purchased reserves still belong to the provider dashboard.
+EOF
+      ;;
+    *energy*|*watt*|*joule*|*electron*|*power*)
+      cat <<'EOF'
+The useful frontier metric is tokens / watt / dollar: how much useful reasoning you get for power and money. TokenBar does not yet sample real Mac power draw. A future energy connector should combine local token logs with battery/powermetrics samples to estimate joules per session and tokens per watt-hour.
+EOF
+      ;;
+    *agent*|*provider*|*chatgpt*|*openai*|*codex*|*claude*|*anthropic*|*gemini*|*cursor*|*antigravity*)
+      cat <<'EOF'
+Provider status:
+  OpenAI Codex: live local log reader.
+  ChatGPT/Codex account limits: visible through Codex rate-limit data when available.
+  Claude, Gemini, Cursor, Antigravity: future connector targets.
+
+Browser sign-in is not enough. Real connectors need explicit usage APIs, local exports, or safe user-provided tokens stored outside the repo.
+EOF
+      ;;
+    *bug*|*debug*|*fix*|*diagnostic*)
+      cat <<EOF
+Diagnostics:
+  App path: $app_path
+  Launcher: $(command -v tokenbar 2>/dev/null || printf 'not on PATH')
+
+Useful commands:
+  tokenbar --path
+  tokenbar --no-animation --no-agent
+  tokenbar --install
+EOF
+      ;;
+    *install*|*download*|*update*)
+      cat <<EOF
+Install or refresh TokenBar with:
+  curl -fsSL $install_url | bash
+
+Current download:
+  $download_url
+EOF
+      ;;
+    *quit*|*exit*|*bye*)
+      return 10
+      ;;
+    "")
+      ;;
+    *)
+      cat <<'EOF'
+I can answer local TokenBar questions about usage, cost, energy, providers, and diagnostics. I am not a cloud-auth connector yet; I do not read browser cookies or provider secrets. Type `help` for examples.
+EOF
+      ;;
+  esac
+}
+
+agent_interface() {
+  local app_path="$1"
+  local cyan=$'\033[36m'
+  local green=$'\033[32m'
+  local dim=$'\033[2m'
+  local reset=$'\033[0m'
+  local input
+
+  printf '\n%sTokenBar agent%s  %sask about usage, cost, energy, agents, bugs; type quit%s\n' "$green" "$reset" "$dim" "$reset"
+  while true; do
+    printf '%sTokenBar ›%s ' "$cyan" "$reset"
+    if ! IFS= read -r input; then
+      printf '\n'
+      break
+    fi
+    answer_agent_prompt "$app_path" "$input"
+    local status=$?
+    if [[ "$status" == "10" ]]; then
+      break
+    fi
+  done
 }
 
 animated_open_message() {
@@ -174,38 +284,44 @@ EOF
 quiet=false
 animate=true
 force_animation=false
+agent=true
 
-case "${1:-}" in
-  -h|--help|help)
-    usage
-    exit 0
-    ;;
-  --install|install)
-    install_tokenbar
-    exit 0
-    ;;
-  --path|path)
-    find_app
-    exit $?
-    ;;
-  --quiet|-q)
-    quiet=true
-    animate=false
-    ;;
-  --no-animation|--plain)
-    animate=false
-    ;;
-  --movie)
-    force_animation=true
-    ;;
-  "")
-    ;;
-  *)
-    echo "Unknown option: $1" >&2
-    usage >&2
-    exit 2
-    ;;
-esac
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help|help)
+      usage
+      exit 0
+      ;;
+    --install|install)
+      install_tokenbar
+      exit 0
+      ;;
+    --path|path)
+      find_app
+      exit $?
+      ;;
+    --quiet|-q)
+      quiet=true
+      animate=false
+      agent=false
+      ;;
+    --no-animation|--plain)
+      animate=false
+      ;;
+    --movie)
+      force_animation=true
+      ;;
+    --no-agent)
+      agent=false
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
 
 if app_path="$(find_app)"; then
   open "$app_path"
@@ -217,6 +333,9 @@ if app_path="$(find_app)"; then
     animated_open_message "$app_path"
   else
     plain_open_message "$app_path"
+  fi
+  if [[ "$agent" == true ]] && supports_agent_interface; then
+    agent_interface "$app_path"
   fi
   exit 0
 fi

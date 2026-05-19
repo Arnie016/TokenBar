@@ -53,22 +53,35 @@ plain_open_message() {
 
 animated_open_message() {
   local app_path="$1"
+  local cyan=$'\033[36m'
+  local blue=$'\033[34m'
+  local amber=$'\033[33m'
+  local green=$'\033[32m'
+  local violet=$'\033[35m'
+  local dim=$'\033[2m'
+  local reset=$'\033[0m'
+  local clear=$'\033[2K'
   local frames=(
-    "TokenBar  [░░░░░░░░░░] finding app"
-    "TokenBar  [██░░░░░░░░] reading local logs"
-    "TokenBar  [████░░░░░░] checking quota"
-    "TokenBar  [██████░░░░] preparing graph"
-    "TokenBar  [████████░░] opening menu bar"
-    "TokenBar  [██████████] ready"
+    "e-  e-  e-       ${amber}J${reset}/$  →  ${dim}waiting for context${reset}"
+    " e-  ✧  e-      ${amber}J${reset}/$  →  ${cyan}token seed${reset}"
+    "  ✧  [tok] ✧    ${amber}W${reset}/$  →  ${cyan}context sparks${reset}"
+    " [tok] ⇄ [tok]  ${amber}tokens${reset}/${blue}watt${reset}/${green}dollar${reset}"
+    "   ◜●◝  VS  100%  ${violet}quota gate${reset}"
+    "  /▣\\  →  ${cyan}TokenBar opening menu-bar radar${reset}"
+    " ✦ [TOKENS] ✦  ${green}visible${reset}  ${dim}limits forecast cost${reset}"
   )
   local frame
 
+  trap "printf '\033[?25h'; trap - INT TERM EXIT" INT TERM EXIT
+  printf '\033[?25l'
   for frame in "${frames[@]}"; do
-    printf '\r\033[36m%s\033[0m' "$frame"
-    sleep 0.08
+    printf '\r%s%s' "$clear" "$frame"
+    sleep 0.11
   done
-  printf '\n\033[32m✓ TokenBar is live in the menu bar\033[0m\n'
-  printf '\033[2m%s\033[0m\n' "$app_path"
+  printf '\r%s%s✓ TokenBar is live%s  %stokens / watt / dollar%s\n' "$clear" "$green" "$reset" "$amber" "$reset"
+  printf '%s%s%s\n' "$dim" "$app_path" "$reset"
+  printf '\033[?25h'
+  trap - INT TERM EXIT
 }
 
 quiet=false
